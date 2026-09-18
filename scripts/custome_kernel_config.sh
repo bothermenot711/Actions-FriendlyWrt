@@ -1,18 +1,16 @@
 #!/bin/bash
+# Append eBPF options to kernel config
+cd kernel
 
-CONFIGS=(
-  "CONFIG_NET_ACT_CT=m"
-  "CONFIG_NET_ACT_CTINFO=m"
-)
+cat >> .config <<'EOF'
+CONFIG_BPF=y
+CONFIG_BPF_SYSCALL=y
+CONFIG_BPF_JIT=y
+CONFIG_BPF_EVENTS=y
+CONFIG_NET_CLS_BPF=m
+CONFIG_NET_ACT_BPF=m
+CONFIG_DEBUG_INFO_BTF=y
+CONFIG_DEBUG_INFO_BTF_MODULES=y
+EOF
 
-source .current_config.mk
-KCFG=kernel/arch/arm64/configs/$(awk '{print $1}' <<< "$TARGET_KERNEL_CONFIG")
-
-for CFG in "${CONFIGS[@]}"; do
-  KEY=${CFG%%=*}
-  if grep -q "^#\?${KEY}=" "${KCFG}"; then
-    sed -i "s@^#\?${KEY}=.*@${CFG}@g" "${KCFG}"
-  else
-    echo "$CFG" >> "${KCFG}"
-  fi
-done
+make CROSS_COMPILE=aarch64-linux-gnu- ARCH=arm64 olddefconfig   
