@@ -1,6 +1,9 @@
 #!/bin/bash
 cd kernel
-export PATH=$PWD/../fa-toolchain/11.3-aarch64/bin:$PATH
+export PATH=$GITHUB_WORKSPACE/fa-toolchain/11.3-aarch64/bin:$PATH
+
+# Verify it's found before proceeding
+which aarch64-linux-gnu-gcc || { echo "Toolchain not found"; ls $GITHUB_WORKSPACE/fa-toolchain/; exit 1; }
 
 cat >> .config <<'EOF'
 CONFIG_BPF=y
